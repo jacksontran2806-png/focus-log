@@ -1,0 +1,19 @@
+# Python
+server/venv/
+**/__pycache__/
+*.pyc
+server/.env
+*.egg-info/
+
+# Node
+client/node_modules/
+client/dist/
+
+# Env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
