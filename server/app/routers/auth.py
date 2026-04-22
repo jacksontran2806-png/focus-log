@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Response, Cookie, status
 from jose import jwt, JWTError
-from passlib.context import CryptContext
+import bcrypt as _bcrypt
 from sqlalchemy.orm import Session
 from typing import Optional
 from google.oauth2 import id_token
@@ -14,7 +14,12 @@ from app.database import get_db
 from app import models, schemas
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
+
+def verify_password(password: str, hashed: str) -> bool:
+    return _bcrypt.checkpw(password.encode(), hashed.encode())
 
 def make_access_token(user: models.User) -> str:
     exp = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -47,7 +52,7 @@ def register(body: schemas.RegisterRequest, response: Response, db: Session = De
 
     user = models.User(
         email=body.email,
-        password_hash=pwd_context.hash(body.password),
+        password_hash=hash_password(body.password),
         name=body.name,
     )
     db.add(user)
@@ -61,7 +66,7 @@ def register(body: schemas.RegisterRequest, response: Response, db: Session = De
 @router.post("/login")
 def login(body: schemas.LoginRequest, response: Response, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == body.email).first()
-    if not user or not pwd_context.verify(body.password, user.password_hash):
+    if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = make_access_token(user)

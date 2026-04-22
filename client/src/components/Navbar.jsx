@@ -17,6 +17,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const isPro = user?.plan === 'pro' || user?.role === 'admin';
   const isAdmin = user?.role === 'admin';
+  const isGuest = user?.role === 'guest';
 
   async function handleLogout() {
     await logout();
@@ -45,9 +46,9 @@ export default function Navbar() {
         <div className="flex items-center gap-1">
           {[
             { to: '/timer', label: 'Timer' },
-            { to: '/dashboard', label: 'Dashboard' },
-            { to: '/settings', label: 'Settings' },
-          ].map(({ to, label }) => (
+            { to: '/dashboard', label: 'Dashboard', guestHide: true },
+            { to: '/settings', label: 'Settings', guestHide: true },
+          ].filter(l => !(isGuest && l.guestHide)).map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}

@@ -17,6 +17,13 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+function AuthOnlyRoute({ children }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role === 'guest') return <Navigate to="/timer" replace />;
+  return children;
+}
+
 function Layout({ children }) {
   return (
     <>
@@ -39,8 +46,8 @@ export default function App() {
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/upgrade" element={<Navigate to="/pricing" replace />} />
               <Route path="/timer" element={<ProtectedRoute><Layout><Timer /></Layout></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
+              <Route path="/dashboard" element={<AuthOnlyRoute><Layout><Dashboard /></Layout></AuthOnlyRoute>} />
+              <Route path="/settings" element={<AuthOnlyRoute><Layout><Settings /></Layout></AuthOnlyRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </SessionProvider>

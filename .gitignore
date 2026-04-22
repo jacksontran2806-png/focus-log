@@ -17,3 +17,6 @@ client/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Database
+server/focuslog.db

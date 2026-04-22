@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PostSessionForm from '../components/PostSessionForm.jsx';
 import { useSettings } from '../context/SettingsContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import { playEndSound, showEndNotification } from '../utils/sound.js';
 import { formatSeconds } from '../utils/time.js';
 
@@ -43,6 +45,9 @@ export function saveNextNote(note) {
 
 export default function Timer() {
   const { settings } = useSettings();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isGuest = user?.role === 'guest';
   const restored = loadTimerState();
   const expiredOnMount = restored?.expired === true;
 
@@ -448,7 +453,36 @@ export default function Timer() {
         )}
       </div>
 
-      {sessionData && (
+      {sessionData && isGuest && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <div className="text-4xl mb-4">⏱</div>
+            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text)' }}>Session complete!</h2>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+              Sign in to save your data, track progress, and see analytics.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate('/register')}
+                className="w-full py-3 rounded-xl font-bold text-sm"
+                style={{ background: 'var(--primary)', color: '#fff' }}
+              >
+                Create free account
+              </button>
+              <button
+                onClick={() => setSessionData(null)}
+                className="w-full py-2 rounded-xl text-sm"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {sessionData && !isGuest && (
         <PostSessionForm
           sessionData={sessionData}
           onClose={() => setSessionData(null)}

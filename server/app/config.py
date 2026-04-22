@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/focuslog")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./focuslog.db")
 JWT_SECRET = os.getenv("JWT_SECRET", "change-this")
 JWT_REFRESH_SECRET = os.getenv("JWT_REFRESH_SECRET", "change-this-too")
 JWT_ALGORITHM = "HS256"

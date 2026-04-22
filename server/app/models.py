@@ -39,7 +39,6 @@ class Session(Base):
     distraction_note = Column(String, nullable=True)
     what_went_well = Column(String, nullable=True)
     what_to_do_better = Column(String, nullable=True)
-    could_be_python = Column(Boolean, nullable=False, default=True)  # always True now
     created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
 
     user = relationship("User", back_populates="sessions")

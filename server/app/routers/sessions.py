@@ -6,7 +6,7 @@ from app import models, schemas
 
 router = APIRouter()
 
-@router.get("/", response_model=list[schemas.SessionOut])
+@router.get("", response_model=list[schemas.SessionOut])
 def list_sessions(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     sessions = (
         db.query(models.Session)
@@ -16,7 +16,7 @@ def list_sessions(current_user: models.User = Depends(get_current_user), db: Ses
     )
     return [_to_out(s) for s in sessions]
 
-@router.post("/", response_model=schemas.SessionOut, status_code=201)
+@router.post("", response_model=schemas.SessionOut, status_code=201)
 def create_session(
     body: schemas.SessionCreate,
     current_user: models.User = Depends(get_current_user),

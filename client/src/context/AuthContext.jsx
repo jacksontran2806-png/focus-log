@@ -91,8 +91,8 @@ export function AuthProvider({ children }) {
 
   const getAccessToken = useCallback(() => accessToken, []);
 
-  const loginGuest = useCallback((name, email) => {
-    const u = { name: name || 'Student', email: email || 'guest@focuslog.local', plan: 'free', role: 'user' };
+  const loginGuest = useCallback(() => {
+    const u = { name: 'Guest', email: 'guest@focuslog.local', plan: 'free', role: 'guest' };
     saveUser(u);
     setUser(u);
   }, []);

@@ -3,8 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import APP_URL, PORT
 from app.routers import auth, sessions, users, email
 from app.services.reminder_scheduler import start_reminder_scheduler
+from app.database import Base, engine
 
 app = FastAPI(title="Focus Log API")
+
+if engine is not None:
+    Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,

@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext.jsx';
 export default function Login() {
   const { login, loginWithGoogle, loginGuest, loginAsAdmin, loginAsTestUser } = useAuth();
   const navigate = useNavigate();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,7 +13,7 @@ export default function Login() {
   const [showAccountLogin, setShowAccountLogin] = useState(false);
 
   function handleGuest() {
-    loginGuest(name.trim() || 'Student', 'guest@focuslog.local');
+    loginGuest();
     navigate('/timer');
   }
 
@@ -61,26 +60,15 @@ export default function Login() {
 
         {/* Guest — primary CTA */}
         <div className="mb-5">
-          <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
-            Your name <span className="normal-case font-normal">(optional)</span>
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="e.g. Alex"
-            className={inputCls}
-            style={inputStyle}
-          />
           <button
             onClick={handleGuest}
-            className="mt-3 w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[.98]"
+            className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[.98]"
             style={{ background: 'var(--primary)', color: '#fff' }}
           >
-            Start tracking — no account needed
+            Continue as Guest
           </button>
           <p className="text-xs text-center mt-2" style={{ color: 'var(--text-faint)' }}>
-            Sessions saved locally in your browser
+            No account needed · data saved locally
           </p>
         </div>
 
@@ -108,6 +96,7 @@ export default function Login() {
             text="signin_with"
           />
         </div>
+        {error && !showAccountLogin && <p className="text-xs text-red-500 text-center -mt-1 mb-2">{error}</p>}
 
         {/* Account login */}
         {!showAccountLogin ? (

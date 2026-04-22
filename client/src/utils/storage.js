@@ -1,13 +1,24 @@
-const SESSIONS_KEY = 'focuslog_sessions';
 const USER_KEY = 'focuslog_user';
 
-export function getSessions() {
+function sessionsKey(email) {
+  return `focuslog_sessions_${email || 'guest'}`;
+}
+
+function currentUserEmail() {
   try {
-    const sessions = JSON.parse(localStorage.getItem(SESSIONS_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(USER_KEY) || 'null')?.email || null;
+  } catch {
+    return null;
+  }
+}
+
+export function getSessions(email) {
+  const key = sessionsKey(email ?? currentUserEmail());
+  try {
+    const sessions = JSON.parse(localStorage.getItem(key) || '[]');
     return sessions.map(s => {
       const d = Number(s.durationSeconds);
       if (!isNaN(d) && d > 0) return s;
-      // Recover duration from wall-clock timestamps for old/corrupt sessions
       if (s.startTime && s.endTime) {
         const recovered = Math.max(Math.round((new Date(s.endTime) - new Date(s.startTime)) / 1000), 1);
         return { ...s, durationSeconds: recovered };
@@ -19,24 +30,28 @@ export function getSessions() {
   }
 }
 
-export function saveSessions(sessions) {
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+export function saveSessions(sessions, email) {
+  const key = sessionsKey(email ?? currentUserEmail());
+  localStorage.setItem(key, JSON.stringify(sessions));
 }
 
-export function saveSession(session) {
-  const sessions = getSessions();
+export function saveSession(session, email) {
+  const resolvedEmail = email ?? currentUserEmail();
+  const sessions = getSessions(resolvedEmail);
   sessions.push(session);
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+  saveSessions(sessions, resolvedEmail);
   return session;
 }
 
-export function deleteSession(id) {
-  const sessions = getSessions().filter(s => s.id !== id);
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+export function deleteSession(id, email) {
+  const resolvedEmail = email ?? currentUserEmail();
+  const sessions = getSessions(resolvedEmail).filter(s => s.id !== id);
+  saveSessions(sessions, resolvedEmail);
 }
 
-export function clearSessions() {
-  localStorage.removeItem(SESSIONS_KEY);
+export function clearSessions(email) {
+  const key = sessionsKey(email ?? currentUserEmail());
+  localStorage.removeItem(key);
 }
 
 export function getUser() {
