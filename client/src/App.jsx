@@ -9,7 +9,7 @@ import Register from './pages/Register.jsx';
 import Timer from './pages/Timer.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Settings from './pages/Settings.jsx';
-import Upgrade from './pages/Upgrade.jsx';
+import Pricing from './pages/Pricing.jsx';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -30,48 +30,21 @@ export default function App() {
   return (
     <BrowserRouter>
       <SettingsProvider>
-      <AuthProvider>
-        <SessionProvider>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/timer"
-              element={
-                <ProtectedRoute>
-                  <Layout><Timer /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Layout><Dashboard /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <Layout><Settings /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/upgrade"
-              element={
-                <ProtectedRoute>
-                  <Layout><Upgrade /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </SessionProvider>
-      </AuthProvider>
+        <AuthProvider>
+          <SessionProvider>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/upgrade" element={<Navigate to="/pricing" replace />} />
+              <Route path="/timer" element={<ProtectedRoute><Layout><Timer /></Layout></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </SessionProvider>
+        </AuthProvider>
       </SettingsProvider>
     </BrowserRouter>
   );

@@ -16,10 +16,30 @@ export function AuthProvider({ children }) {
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) throw new Error((await res.json()).message || 'Login failed');
       const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || data.message || 'Login failed');
       accessToken = data.accessToken;
-      const u = { name: data.user.name, email: data.user.email, plan: data.user.plan || 'free' };
+      const u = { name: data.user.name, email: data.user.email, plan: data.user.plan || 'free', role: 'user' };
+      saveUser(u);
+      setUser(u);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  }, []);
+
+  const loginWithGoogle = useCallback(async (credential) => {
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Google sign-in failed');
+      accessToken = data.accessToken;
+      const u = { name: data.user.name, email: data.user.email, plan: data.user.plan || 'free', role: 'user' };
       saveUser(u);
       setUser(u);
       return { ok: true };
@@ -36,10 +56,10 @@ export function AuthProvider({ children }) {
         credentials: 'include',
         body: JSON.stringify({ name, email, password }),
       });
-      if (!res.ok) throw new Error((await res.json()).message || 'Register failed');
       const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || data.message || 'Register failed');
       accessToken = data.accessToken;
-      const u = { name: data.user.name, email: data.user.email, plan: 'free' };
+      const u = { name: data.user.name, email: data.user.email, plan: 'free', role: 'user' };
       saveUser(u);
       setUser(u);
       return { ok: true };
@@ -71,20 +91,35 @@ export function AuthProvider({ children }) {
 
   const getAccessToken = useCallback(() => accessToken, []);
 
-  // Guest login: just use localStorage user
   const loginGuest = useCallback((name, email) => {
-    const u = { name, email, plan: 'free' };
+    const u = { name: name || 'Student', email: email || 'guest@focuslog.local', plan: 'free', role: 'user' };
     saveUser(u);
     setUser(u);
   }, []);
 
-  const upgradePlan = useCallback(() => {
-    setPlan('pro');
-    setUser(prev => ({ ...prev, plan: 'pro' }));
+  // Test accounts for development — admin gets full pro access
+  const loginAsAdmin = useCallback(() => {
+    const u = { name: 'Admin', email: 'admin@focuslog.local', plan: 'pro', role: 'admin' };
+    saveUser(u);
+    setUser(u);
+  }, []);
+
+  const loginAsTestUser = useCallback(() => {
+    const u = { name: 'Test User', email: 'user@focuslog.local', plan: 'free', role: 'user' };
+    saveUser(u);
+    setUser(u);
+  }, []);
+
+  const upgradePlan = useCallback((plan = 'pro') => {
+    setPlan(plan);
+    setUser(prev => ({ ...prev, plan }));
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, refreshToken, getAccessToken, loginGuest, upgradePlan }}>
+    <AuthContext.Provider value={{
+      user, login, loginWithGoogle, register, logout, refreshToken, getAccessToken,
+      loginGuest, loginAsAdmin, loginAsTestUser, upgradePlan,
+    }}>
       {children}
     </AuthContext.Provider>
   );

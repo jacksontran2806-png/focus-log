@@ -1,7 +1,7 @@
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { calcDistractionBreakdown } from '../utils/stats.js';
 
-const COLORS = ['#6366f1', '#f59e0b', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+const COLORS = ['var(--primary)', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
 
 const LABEL_MAP = {
   tiktok: 'TikTok', youtube: 'YouTube', chat: 'Chat',
@@ -14,22 +14,25 @@ export default function DistractionDonut({ sessions }) {
 
   if (!data.length) {
     return (
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-center h-48">
-        <p className="text-gray-400 text-sm">No sessions yet</p>
+      <div className="rounded-xl p-5 flex items-center justify-center h-32" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+        <p className="text-sm" style={{ color: 'var(--text-faint)' }}>No sessions logged yet</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-      <h3 className="text-sm font-semibold text-gray-700 mb-4">Distraction breakdown</h3>
-      <ResponsiveContainer width="100%" height={220}>
+    <div className="rounded-xl p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+      <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--text)' }}>Distraction breakdown</h3>
+      <ResponsiveContainer width="100%" height={200}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={2}>
+          <Pie data={data} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2}>
             {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
           </Pie>
-          <Tooltip />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
+          <Tooltip
+            formatter={(v, n) => [v, n]}
+            contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px', color: 'var(--text)' }}
+          />
+          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', color: 'var(--text-muted)' }} />
         </PieChart>
       </ResponsiveContainer>
     </div>

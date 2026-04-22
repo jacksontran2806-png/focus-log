@@ -8,6 +8,7 @@ python-dotenv==1.0.1
 python-multipart==0.0.19
 apscheduler==3.10.4
 pytz==2024.2
+google-auth==2.49.2
 email-validator==2.2.0
 # PostgreSQL driver — install separately once PostgreSQL is set up:
 # pip install psycopg2-binary

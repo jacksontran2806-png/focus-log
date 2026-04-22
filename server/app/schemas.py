@@ -12,6 +12,9 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+class GoogleAuthRequest(BaseModel):
+    credential: str
+
 class TokenResponse(BaseModel):
     accessToken: str
     user: dict

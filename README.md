@@ -1,17 +1,19 @@
 # Focus Log
 
+> **Status: In Development** — core timer and dashboard work in guest mode (localStorage). Account auth, database sync, and email features are not yet functional.
+
 A full-stack web app for students to track focused vs distracted study time.
 
 ## Stack
 
 - **Frontend**: React + Vite + React Router v6 + Tailwind CSS
 - **State**: React Context + useReducer
-- **Storage**: localStorage (Phase 1, fully working) → PostgreSQL via SQLAlchemy (Phase 2)
+- **Storage**: localStorage (guest mode, working) → PostgreSQL via SQLAlchemy (in development)
 - **Backend**: Python + FastAPI + Uvicorn
-- **Database**: PostgreSQL + SQLAlchemy ORM + Alembic migrations
-- **Auth**: JWT via python-jose (access token in memory, refresh token in httpOnly cookie)
-- **Email**: smtplib (built-in Python, Gmail app password via env vars)
-- **Scheduler**: APScheduler (daily reminder cron)
+- **Database**: PostgreSQL + SQLAlchemy ORM + Alembic migrations (in development — no DB required to run)
+- **Auth**: JWT via python-jose (in development — requires database)
+- **Email**: smtplib via Gmail app password (in development — requires SMTP config)
+- **Scheduler**: APScheduler daily reminder cron (in development)
 
 ## Setup
 
@@ -60,12 +62,18 @@ Auto-generated API docs: http://localhost:3001/docs
 
 ## Features
 
+### Working
 - **Timer** — countdown with 25/50 min presets, custom duration, pause/resume, sessionStorage persistence
 - **Post-session form** — 10-star rating (hover preview), distraction chip selector, contextual tips, reflections
 - **Dashboard** — total/today/week time, avg rating, efficiency score, streak, bar chart, trend line, donut chart, session table
-- **Auth** — JWT with refresh tokens, guest mode (localStorage only)
-- **Email reminders** — daily APScheduler job, timezone-aware, configurable per user
-- **Subscription gating** — Free vs Pro (simulated, no payment)
+- **Guest mode** — all data saved to localStorage, no account needed
+- **Settings** — dark mode, font size (localStorage)
+
+### In Development
+- **Account auth** — JWT login/register with refresh tokens (requires PostgreSQL)
+- **Session sync** — persist sessions to backend database (requires PostgreSQL)
+- **Email reminders** — daily APScheduler job, timezone-aware, configurable per user (requires SMTP + database)
+- **Subscription / Pro plan** — upgrade flow UI exists but payment is not implemented
 
 ## Database schema
 

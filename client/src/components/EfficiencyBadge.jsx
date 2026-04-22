@@ -1,21 +1,21 @@
 import { efficiencyLabel } from '../utils/stats.js';
 
-const COLORS = {
-  'Needs work': 'bg-red-100 text-red-700',
-  'Building habits': 'bg-amber-100 text-amber-700',
-  'On track': 'bg-blue-100 text-blue-700',
-  'Flow state': 'bg-green-100 text-green-700',
-};
-
 export default function EfficiencyBadge({ pct }) {
   const label = efficiencyLabel(pct);
+  const color = pct >= 80 ? '#22c55e' : pct >= 60 ? '#f59e0b' : pct >= 30 ? 'var(--primary)' : '#94a3b8';
+
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Efficiency</p>
-      <p className="text-2xl font-bold text-gray-900 mt-1">{pct}%</p>
-      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block ${COLORS[label]}`}>
-        {label}
-      </span>
+    <div
+      className="rounded-xl p-4"
+      style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+    >
+      <p className="text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
+        Efficiency score
+      </p>
+      <div className="flex items-baseline gap-2">
+        <p className="text-2xl font-extrabold" style={{ color }}>{pct}%</p>
+      </div>
+      <p className="text-xs mt-0.5 font-medium" style={{ color }}>{label}</p>
     </div>
   );
 }

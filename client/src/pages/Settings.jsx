@@ -16,19 +16,27 @@ const TABS = [
 ];
 
 const THEME_COLORS = [
-  { id: 'indigo', label: 'Indigo', cls: 'bg-indigo-500' },
-  { id: 'violet', label: 'Violet', cls: 'bg-violet-500' },
-  { id: 'sky', label: 'Sky', cls: 'bg-sky-500' },
-  { id: 'emerald', label: 'Emerald', cls: 'bg-emerald-500' },
-  { id: 'rose', label: 'Rose', cls: 'bg-rose-500' },
-  { id: 'amber', label: 'Amber', cls: 'bg-amber-500' },
+  { id: 'indigo',  label: 'Arctic Frost', hex: '#4a6fa5' },
+  { id: 'violet',  label: 'Violet',       hex: '#7c3aed' },
+  { id: 'sky',     label: 'Sky',          hex: '#0284c7' },
+  { id: 'emerald', label: 'Emerald',      hex: '#059669' },
+  { id: 'rose',    label: 'Rose',         hex: '#e11d48' },
+  { id: 'amber',   label: 'Amber',        hex: '#d97706' },
 ];
+
+const inputStyle = {
+  background: 'var(--bg)',
+  border: '1px solid var(--border)',
+  color: 'var(--text)',
+};
 
 function Section({ title, children }) {
   return (
     <div className="mb-8">
-      <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{title}</h3>
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
+      <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>
+        {title}
+      </h3>
+      <div className="rounded-xl overflow-hidden theme-divide" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
         {children}
       </div>
     </div>
@@ -39,8 +47,8 @@ function Row({ label, sub, children }) {
   return (
     <div className="flex items-center justify-between px-4 py-3 gap-4">
       <div>
-        <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{label}</p>
-        {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+        <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{label}</p>
+        {sub && <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{sub}</p>}
       </div>
       <div className="flex-shrink-0">{children}</div>
     </div>
@@ -54,7 +62,8 @@ function Toggle({ checked, onChange }) {
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'}`}
+      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+      style={{ background: checked ? 'var(--primary)' : 'var(--border)' }}
     >
       <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
     </button>
@@ -69,7 +78,8 @@ function NumberInput({ value, onChange, min, max }) {
       min={min}
       max={max}
       onChange={e => onChange(Number(e.target.value))}
-      className="w-20 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      className="w-20 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      style={inputStyle}
     />
   );
 }
@@ -79,7 +89,8 @@ function SelectInput({ value, onChange, options }) {
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      className="rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      style={inputStyle}
     >
       {options.map(o => (
         <option key={o.value} value={o.value}>{o.label}</option>
@@ -98,9 +109,7 @@ export default function Settings() {
   );
   const [toast, setToast] = useState('');
 
-  function set(key, value) {
-    updateSettings({ [key]: value });
-  }
+  function set(key, value) { updateSettings({ [key]: value }); }
 
   function showToast(msg) {
     setToast(msg);
@@ -114,9 +123,7 @@ export default function Settings() {
     setNewTag('');
   }
 
-  function removeTag(tag) {
-    set('tags', settings.tags.filter(t => t !== tag));
-  }
+  function removeTag(tag) { set('tags', settings.tags.filter(t => t !== tag)); }
 
   function addSite() {
     const s = newSite.trim().toLowerCase().replace(/^https?:\/\//, '');
@@ -125,9 +132,7 @@ export default function Settings() {
     setNewSite('');
   }
 
-  function removeSite(site) {
-    set('blockSites', settings.blockSites.filter(s => s !== site));
-  }
+  function removeSite(site) { set('blockSites', settings.blockSites.filter(s => s !== site)); }
 
   async function handleRequestNotif() {
     const granted = await requestNotificationPermission();
@@ -194,26 +199,27 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+    <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--bg)' }}>
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-700 text-white text-sm px-4 py-2 rounded-xl shadow-lg z-50 pointer-events-none">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 text-white text-sm px-4 py-2 rounded-xl shadow-lg z-50 pointer-events-none"
+          style={{ background: 'var(--text)', color: 'var(--bg)' }}>
           {toast}
         </div>
       )}
 
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Settings</h1>
+        <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--text)' }}>Settings</h1>
 
         <div className="flex gap-1 overflow-x-auto pb-2 mb-6">
           {TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors tab-hover"
+              style={activeTab === tab.id
+                ? { background: 'var(--primary)', color: '#fff' }
+                : { color: 'var(--text-muted)' }
+              }
             >
               {tab.label}
             </button>
@@ -263,9 +269,10 @@ export default function Settings() {
               <div className="px-4 py-3">
                 <div className="flex flex-wrap gap-2 mb-3">
                   {settings.tags.map(tag => (
-                    <span key={tag} className="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm px-3 py-1 rounded-full">
+                    <span key={tag} className="flex items-center gap-1 text-sm px-3 py-1 rounded-full"
+                      style={{ background: 'var(--primary-muted)', color: 'var(--primary)', border: '1px solid var(--primary-lt)' }}>
                       {tag}
-                      <button onClick={() => removeTag(tag)} className="text-indigo-400 hover:text-red-500 ml-1 leading-none">&times;</button>
+                      <button onClick={() => removeTag(tag)} className="ml-1 leading-none hover:text-red-500" style={{ color: 'var(--text-faint)' }}>&times;</button>
                     </span>
                   ))}
                 </div>
@@ -275,9 +282,10 @@ export default function Settings() {
                     onChange={e => setNewTag(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && addTag()}
                     placeholder="Add subject..."
-                    className="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="flex-1 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    style={inputStyle}
                   />
-                  <button onClick={addTag} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-indigo-700">Add</button>
+                  <button onClick={addTag} className="px-3 py-1.5 rounded-lg text-sm text-white" style={{ background: 'var(--primary)' }}>Add</button>
                 </div>
               </div>
             </Section>
@@ -299,7 +307,8 @@ export default function Settings() {
                     step={0.05}
                     value={settings.soundVolume}
                     onChange={e => set('soundVolume', parseFloat(e.target.value))}
-                    className="w-32 accent-indigo-600"
+                    className="w-32"
+                    style={{ accentColor: 'var(--primary)' }}
                   />
                 </Row>
               )}
@@ -315,7 +324,7 @@ export default function Settings() {
                   sub={notifStatus === 'denied' ? 'Blocked in your browser — go to browser settings to allow.' : 'Click Allow to enable notifications.'}
                 >
                   {notifStatus !== 'denied' && (
-                    <button onClick={handleRequestNotif} className="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700">
+                    <button onClick={handleRequestNotif} className="text-xs px-3 py-1.5 rounded-lg text-white" style={{ background: 'var(--primary)' }}>
                       Allow
                     </button>
                   )}
@@ -338,7 +347,8 @@ export default function Settings() {
                     type="time"
                     value={settings.reminderTime}
                     onChange={e => set('reminderTime', e.target.value)}
-                    className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="rounded-lg px-2 py-1 text-sm focus:outline-none"
+                    style={inputStyle}
                   />
                 </Row>
               )}
@@ -370,7 +380,7 @@ export default function Settings() {
                 <div className="px-4 py-3">
                   <div className="flex flex-wrap gap-2 mb-3">
                     {settings.blockSites.map(site => (
-                      <span key={site} className="flex items-center gap-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 text-sm px-3 py-1 rounded-full">
+                      <span key={site} className="flex items-center gap-1 bg-red-50 text-red-600 text-sm px-3 py-1 rounded-full">
                         {site}
                         <button onClick={() => removeSite(site)} className="text-red-300 hover:text-red-600 ml-1 leading-none">&times;</button>
                       </span>
@@ -382,7 +392,8 @@ export default function Settings() {
                       onChange={e => setNewSite(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && addSite()}
                       placeholder="e.g. facebook.com"
-                      className="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      className="flex-1 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      style={inputStyle}
                     />
                     <button onClick={addSite} className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-red-600">Add</button>
                   </div>
@@ -395,17 +406,23 @@ export default function Settings() {
         {activeTab === 'appearance' && (
           <>
             <Section title="Theme">
-              <Row label="Dark mode">
+              <Row label="Dark mode" sub="Switch between light and dark backgrounds">
                 <Toggle checked={settings.darkMode} onChange={v => set('darkMode', v)} />
               </Row>
-              <Row label="Accent color">
+              <Row label="Accent color" sub="Changes buttons, highlights, and links across the entire app">
                 <div className="flex gap-2">
                   {THEME_COLORS.map(c => (
                     <button
                       key={c.id}
                       title={c.label}
                       onClick={() => set('themeColor', c.id)}
-                      className={`w-6 h-6 rounded-full ${c.cls} transition-transform hover:scale-110 ${settings.themeColor === c.id ? 'ring-2 ring-offset-2 ring-gray-500 dark:ring-gray-300 scale-110' : ''}`}
+                      className="w-6 h-6 rounded-full transition-transform hover:scale-110"
+                      style={{
+                        background: c.hex,
+                        transform: settings.themeColor === c.id ? 'scale(1.15)' : undefined,
+                        outline: settings.themeColor === c.id ? `2px solid var(--text)` : 'none',
+                        outlineOffset: '2px',
+                      }}
                     />
                   ))}
                 </div>
@@ -434,12 +451,14 @@ export default function Settings() {
           <>
             <Section title="Export">
               <Row label="Export as CSV" sub="Spreadsheet-compatible — open in Excel or Sheets">
-                <button onClick={exportCSV} className="bg-gray-800 dark:bg-gray-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-gray-700">
+                <button onClick={exportCSV} className="text-sm px-3 py-1.5 rounded-lg"
+                  style={{ background: 'var(--text)', color: 'var(--bg)' }}>
                   Download CSV
                 </button>
               </Row>
               <Row label="Export as JSON" sub="Full data for backup or re-import">
-                <button onClick={exportJSON} className="bg-gray-800 dark:bg-gray-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-gray-700">
+                <button onClick={exportJSON} className="text-sm px-3 py-1.5 rounded-lg"
+                  style={{ background: 'var(--text)', color: 'var(--bg)' }}>
                   Download JSON
                 </button>
               </Row>
@@ -447,7 +466,8 @@ export default function Settings() {
 
             <Section title="Import">
               <Row label="Import JSON" sub="Merge from a previous export — duplicates are skipped">
-                <label className="cursor-pointer bg-indigo-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-indigo-700 inline-block">
+                <label className="cursor-pointer text-sm px-3 py-1.5 rounded-lg inline-block text-white"
+                  style={{ background: 'var(--primary)' }}>
                   Choose file
                   <input type="file" accept=".json" onChange={importJSON} className="hidden" />
                 </label>
@@ -456,12 +476,12 @@ export default function Settings() {
 
             <Section title="Danger Zone">
               <Row label="Reset all settings" sub="Restores every setting to its default value">
-                <button onClick={resetSettings} className="text-sm text-orange-600 border border-orange-300 px-3 py-1.5 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20">
+                <button onClick={resetSettings} className="text-sm text-orange-600 border border-orange-300 px-3 py-1.5 rounded-lg hover:bg-orange-50">
                   Reset settings
                 </button>
               </Row>
               <Row label="Delete all session data" sub="Permanently removes every logged session from this browser">
-                <button onClick={resetData} className="text-sm text-red-600 border border-red-300 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                <button onClick={resetData} className="text-sm text-red-600 border border-red-300 px-3 py-1.5 rounded-lg hover:bg-red-50">
                   Delete all
                 </button>
               </Row>
@@ -489,17 +509,17 @@ export default function Settings() {
         )}
 
         {activeTab === 'about' && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+          <div className="rounded-xl p-6 space-y-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
             <div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">Focus Log</p>
-              <p className="text-sm text-gray-400 mt-0.5">Version 1.0.0</p>
+              <p className="text-xl font-bold" style={{ color: 'var(--text)' }}>Focus Log</p>
+              <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Version 1.0.0</p>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               A study session tracker that helps you understand your focus patterns, build streaks, and improve over time. No ads, no distractions.
             </p>
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Tips</p>
-              <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Tips</p>
+              <ul className="list-disc list-inside space-y-1.5 text-sm" style={{ color: 'var(--text-muted)' }}>
                 <li>Rate every session honestly — even bad ones give you data.</li>
                 <li>Streaks are counted by calendar day, not total hours.</li>
                 <li>The efficiency score combines your average rating with consistency.</li>
@@ -507,7 +527,7 @@ export default function Settings() {
                 <li>Upgrade to Pro for trend lines, the distraction chart, and full history.</li>
               </ul>
             </div>
-            <p className="text-xs text-gray-400 pt-1 border-t border-gray-100 dark:border-gray-700">
+            <p className="text-xs pt-1" style={{ color: 'var(--text-faint)', borderTop: '1px solid var(--border)' }}>
               All data is stored in your browser. Nothing is sent to a server.
             </p>
           </div>

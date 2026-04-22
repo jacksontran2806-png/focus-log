@@ -7,7 +7,8 @@ class Base(DeclarativeBase):
     pass
 
 try:
-    engine = create_engine(DATABASE_URL)
+    connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+    engine = create_engine(DATABASE_URL, connect_args=connect_args)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     _db_available = True
 except Exception as e:

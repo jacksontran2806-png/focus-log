@@ -14,17 +14,24 @@ export function SettingsProvider({ children }) {
     });
   }
 
-  // Apply dark mode class to <html> whenever setting changes
   useEffect(() => {
     document.documentElement.classList.toggle('dark', settings.darkMode);
   }, [settings.darkMode]);
 
-  // Apply font size class to <html>
   useEffect(() => {
     document.documentElement.classList.remove('text-sm', 'text-base', 'text-lg');
     if (settings.fontSize === 'small') document.documentElement.classList.add('text-sm');
     if (settings.fontSize === 'large') document.documentElement.classList.add('text-lg');
   }, [settings.fontSize]);
+
+  // Wire accent color to CSS variable overrides via data-accent on <html>
+  useEffect(() => {
+    if (!settings.themeColor || settings.themeColor === 'indigo') {
+      document.documentElement.removeAttribute('data-accent');
+    } else {
+      document.documentElement.setAttribute('data-accent', settings.themeColor);
+    }
+  }, [settings.themeColor]);
 
   return (
     <SettingsContext.Provider value={{ settings, updateSettings }}>

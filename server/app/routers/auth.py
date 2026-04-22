@@ -4,9 +4,11 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from typing import Optional
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 from app.config import (
     JWT_SECRET, JWT_REFRESH_SECRET, JWT_ALGORITHM,
-    ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS,
+    ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS, GOOGLE_CLIENT_ID,
 )
 from app.database import get_db
 from app import models, schemas
@@ -84,3 +86,26 @@ def refresh(response: Response, refreshToken: Optional[str] = Cookie(default=Non
 def logout(response: Response):
     response.delete_cookie("refreshToken", path="/api/auth")
     return {"ok": True}
+
+@router.post("/google")
+def google_auth(body: schemas.GoogleAuthRequest, response: Response, db: Session = Depends(get_db)):
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="Google OAuth not configured")
+    try:
+        info = id_token.verify_oauth2_token(body.credential, google_requests.Request(), GOOGLE_CLIENT_ID)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    email = info.get("email")
+    name = info.get("name") or email.split("@")[0]
+
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        user = models.User(email=email, name=name, password_hash="google_oauth")
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    access_token = make_access_token(user)
+    set_refresh_cookie(response, make_refresh_token(user))
+    return {"accessToken": access_token, "user": {"id": user.id, "name": user.name, "email": user.email, "plan": user.plan}}

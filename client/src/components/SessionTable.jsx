@@ -7,61 +7,117 @@ const LABEL_MAP = {
   phone: 'Phone', noise: 'Noise', none: 'None', other: 'Other',
 };
 
+const SORT_OPTIONS = [
+  { id: 'newest',         label: 'Newest first' },
+  { id: 'oldest',         label: 'Oldest first' },
+  { id: 'most_efficient', label: 'Most efficient' },
+  { id: 'least_efficient',label: 'Least efficient' },
+  { id: 'longest',        label: 'Longest session' },
+  { id: 'shortest',       label: 'Shortest session' },
+];
+
+function sortSessions(sessions, sortId) {
+  const arr = [...sessions];
+  switch (sortId) {
+    case 'newest':          return arr.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+    case 'oldest':          return arr.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    case 'most_efficient':  return arr.sort((a, b) => (b.focusRating || 0) - (a.focusRating || 0));
+    case 'least_efficient': return arr.sort((a, b) => (a.focusRating || 0) - (b.focusRating || 0));
+    case 'longest':         return arr.sort((a, b) => (b.durationSeconds || 0) - (a.durationSeconds || 0));
+    case 'shortest':        return arr.sort((a, b) => (a.durationSeconds || 0) - (b.durationSeconds || 0));
+    default:                return arr;
+  }
+}
+
 export default function SessionTable({ sessions }) {
   const [showAll, setShowAll] = useState(false);
-  const [sortDesc, setSortDesc] = useState(true);
+  const [sortId, setSortId] = useState('newest');
 
-  const sorted = [...sessions].sort((a, b) => {
-    const diff = new Date(b.startTime) - new Date(a.startTime);
-    return sortDesc ? diff : -diff;
-  });
+  const sorted = sortSessions(sessions, sortId);
   const visible = showAll ? sorted : sorted.slice(0, 50);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-700">Session history</h3>
-        <button
-          onClick={() => setSortDesc(d => !d)}
-          className="text-xs text-indigo-600 hover:underline"
+    <div className="rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+      <div
+        className="flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
+        <h3 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Session history</h3>
+        <select
+          value={sortId}
+          onChange={e => setSortId(e.target.value)}
+          className="text-xs px-3 py-1.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          style={{
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            color: 'var(--text)',
+          }}
         >
-          Sort {sortDesc ? '↑ oldest' : '↓ newest'}
-        </button>
+          {SORT_OPTIONS.map(o => (
+            <option key={o.id} value={o.id}>{o.label}</option>
+          ))}
+        </select>
       </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
-            <tr>
-              <th className="px-4 py-2 text-left">Date</th>
-              <th className="px-4 py-2 text-left">Label</th>
-              <th className="px-4 py-2 text-left">Duration</th>
-              <th className="px-4 py-2 text-left">Focus</th>
-              <th className="px-4 py-2 text-left">Distraction</th>
-              <th className="px-4 py-2 text-left">Better next time</th>
+          <thead>
+            <tr style={{ background: 'var(--bg)' }}>
+              {['Date', 'Label', 'Duration', 'Focus', 'Distraction', 'Improvement note'].map(h => (
+                <th key={h} className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {visible.map(s => (
-              <tr key={s.id} className="border-t border-gray-50 hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap text-gray-600">{formatDate(s.startTime)}</td>
-                <td className="px-4 py-2 text-gray-700 max-w-[120px] truncate">{s.label || '—'}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-gray-600">{formatDuration(s.durationSeconds)}</td>
-                <td className="px-4 py-2">
+            {visible.map((s, i) => (
+              <tr
+                key={s.id}
+                style={{
+                  borderTop: '1px solid var(--border-soft)',
+                  background: i % 2 === 0 ? 'transparent' : 'var(--bg)',
+                }}
+                className="hover:bg-opacity-50 transition-colors"
+              >
+                <td className="px-4 py-2.5 whitespace-nowrap text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {formatDate(s.startTime)}
+                </td>
+                <td className="px-4 py-2.5 text-sm font-medium max-w-[120px] truncate" style={{ color: 'var(--text)' }}>
+                  {s.label || <span style={{ color: 'var(--text-faint)' }}>—</span>}
+                </td>
+                <td className="px-4 py-2.5 whitespace-nowrap text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {formatDuration(s.durationSeconds)}
+                </td>
+                <td className="px-4 py-2.5">
                   <StarRating value={s.focusRating} readOnly />
                 </td>
-                <td className="px-4 py-2 text-gray-600">{LABEL_MAP[s.distractionType] || s.distractionType}</td>
-                <td className="px-4 py-2 text-gray-500 max-w-[180px] truncate">{s.whatToDoBetter || '—'}</td>
+                <td className="px-4 py-2.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {LABEL_MAP[s.distractionType] || s.distractionType}
+                </td>
+                <td className="px-4 py-2.5 text-xs max-w-[180px] truncate" style={{ color: 'var(--text-muted)' }}>
+                  {s.whatToDoBetter || <span style={{ color: 'var(--text-faint)' }}>—</span>}
+                </td>
               </tr>
             ))}
             {!visible.length && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-400">No sessions yet</td></tr>
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-sm" style={{ color: 'var(--text-faint)' }}>
+                  No sessions yet
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
       </div>
+
       {sessions.length > 50 && (
-        <div className="px-4 py-3 border-t border-gray-100 text-center">
-          <button onClick={() => setShowAll(v => !v)} className="text-sm text-indigo-600 hover:underline">
+        <div className="px-4 py-3 text-center" style={{ borderTop: '1px solid var(--border-soft)' }}>
+          <button
+            onClick={() => setShowAll(v => !v)}
+            className="text-sm font-medium hover:underline"
+            style={{ color: 'var(--primary)' }}
+          >
             {showAll ? 'Show less' : `Show all ${sessions.length} sessions`}
           </button>
         </div>

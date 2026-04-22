@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Register() {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,58 +23,91 @@ export default function Register() {
     else setError(result.error);
   }
 
+  const inputCls = 'w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none transition-all';
+  const inputStyle = { background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)' };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Create account</h1>
-        <p className="text-sm text-gray-500 mb-6">Start tracking your focus sessions</p>
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: 'linear-gradient(135deg, var(--primary-muted) 0%, var(--bg) 60%)' }}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl p-8 shadow-xl"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+      >
+        <div className="flex items-center gap-2 mb-6">
+          <img src="/logo.svg" alt="" className="w-7 h-7" onError={e => e.currentTarget.style.display = 'none'} />
+          <span className="font-extrabold text-base tracking-tight" style={{ color: 'var(--primary)' }}>Focus Log</span>
+        </div>
+
+        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text)' }}>Create account</h1>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>Start tracking your focus sessions</p>
+
+        <div className="flex justify-center mb-4">
+          <GoogleLogin
+            onSuccess={async ({ credential }) => {
+              const result = await loginWithGoogle(credential);
+              if (result.ok) navigate('/timer');
+              else setError(result.error);
+            }}
+            onError={() => setError('Google sign-in failed')}
+            theme="outline"
+            size="large"
+            width="320"
+            text="signup_with"
+          />
+        </div>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full" style={{ borderTop: '1px solid var(--border)' }} />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="px-3 text-xs" style={{ background: 'var(--surface)', color: 'var(--text-faint)' }}>or</span>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={e => setName(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="At least 8 characters"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {[
+            { label: 'Name', type: 'text', value: name, setter: setName },
+            { label: 'Email', type: 'email', value: email, setter: setEmail },
+            { label: 'Password', type: 'password', value: password, setter: setPassword, placeholder: 'At least 8 characters' },
+          ].map(({ label, type, value, setter, placeholder }) => (
+            <div key={label}>
+              <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                {label}
+              </label>
+              <input
+                type={type}
+                required
+                value={value}
+                onChange={e => setter(e.target.value)}
+                placeholder={placeholder}
+                className={inputCls}
+                style={inputStyle}
+              />
+            </div>
+          ))}
+
+          {error && <p className="text-xs text-red-500">{error}</p>}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-60"
+            className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[.98] disabled:opacity-50"
+            style={{ background: 'var(--primary)', color: '#fff' }}
           >
             {loading ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-xs mt-5" style={{ color: 'var(--text-muted)' }}>
           Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 font-medium hover:underline">Sign in</Link>
+          <Link to="/login" style={{ color: 'var(--primary)' }} className="font-semibold hover:underline">
+            Sign in
+          </Link>
         </p>
+
       </div>
     </div>
   );
